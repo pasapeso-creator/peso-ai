@@ -43,11 +43,22 @@ const AppLayout = () => {
   useEffect(() => {
     let mounted = true;
 
+    // Safety timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('Auth initialization timed out');
+        setLoading(false);
+      }
+    }, 6000); // 6 seconds safety blanket
+
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (mounted) {
           if (session) {
+            // We have a session, let's load user data
+            // We call it but we don't necessarily await it if we want to be super safe,
+            // but checkUser has its own finally { setLoading(false) }
             await checkUser();
           } else {
             setLoading(false);
@@ -56,6 +67,8 @@ const AppLayout = () => {
       } catch (err) {
         console.error('Init error:', err);
         if (mounted) setLoading(false);
+      } finally {
+        clearTimeout(timer);
       }
     };
 
@@ -63,18 +76,22 @@ const AppLayout = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (mounted) {
-        if (event === 'SIGNED_IN') {
-          await checkUser();
-        } else if (event === 'SIGNED_OUT') {
-          setUserProfile(null);
-          setLoading(false);
-        }
+      if (!mounted) return;
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        await checkUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUserProfile(null);
+        setRequests([]);
+        setLoading(false);
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        setLoading(false);
       }
     });
 
     return () => {
       mounted = false;
+      clearTimeout(timer);
       subscription.unsubscribe();
     };
   }, []);

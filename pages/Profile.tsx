@@ -81,7 +81,7 @@ const Profile: React.FC = () => {
         <div className="flex items-center gap-5">
            <div className="relative group">
              <div className="absolute -inset-1 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-             <div className="relative w-20 h-20 bg-slate-900 rounded-2xl border border-slate-700/50 flex items-center justify-center text-3xl font-black text-white shadow-2xl">
+             <div className="relative w-20 h-20 bg-slate-900 rounded-2xl border border-slate-700/50 flex items-center justify-center text-3xl font-black text-white shadow-2xl transition-transform group-hover:scale-110 duration-500">
                 {profile.full_name?.charAt(0).toUpperCase()}
              </div>
              {profile.is_subscribed && (
@@ -232,22 +232,23 @@ const Profile: React.FC = () => {
               </button>
            </div>
 
-           <div className="bg-slate-900/50 rounded-[2.5rem] p-8 border border-slate-800 space-y-6">
-              <h4 className="text-lg font-bold text-white flex items-center gap-2">
+           <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] p-8 border border-slate-800/50 space-y-6 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-colors"></div>
+              <h4 className="text-lg font-bold text-white flex items-center gap-2 relative z-10">
                  معلومات الأمان <Shield size={18} className="text-emerald-500" />
               </h4>
-              <div className="space-y-4">
-                 <div className="flex justify-between items-center text-sm border-b border-slate-800/50 pb-4">
-                    <span className="text-emerald-400 font-bold">نشط</span>
-                    <span className="text-slate-400">حالة الحساب</span>
+              <div className="space-y-4 relative z-10">
+                 <div className="flex justify-between items-center text-sm border-b border-slate-800/30 pb-4">
+                    <span className="text-emerald-400 font-bold bg-emerald-400/10 px-2 py-0.5 rounded">نشط</span>
+                    <span className="text-slate-400 font-medium">حالة الحساب</span>
                  </div>
-                 <div className="flex justify-between items-center text-sm border-b border-slate-800/50 pb-4">
+                 <div className="flex justify-between items-center text-sm border-b border-slate-800/30 pb-4">
                     <span className="text-white font-bold">Google Auth</span>
-                    <span className="text-slate-400">طريقة الدخول</span>
+                    <span className="text-slate-400 font-medium">طريقة الدخول</span>
                  </div>
                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-blue-400 font-bold">PESO-v2.0</span>
-                    <span className="text-slate-400">الإصدار</span>
+                    <span className="text-blue-400 font-bold">PESO-v2.1</span>
+                    <span className="text-slate-400 font-medium">الإصدار</span>
                  </div>
               </div>
            </div>
