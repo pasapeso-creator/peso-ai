@@ -34,20 +34,25 @@ export const authService = {
 
   // Get current user profile
   async getCurrentProfile(): Promise<UserProfile | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    try {
+      const { data, error: userError } = await supabase.auth.getUser();
+      if (userError || !data?.user) return null;
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+      return profile;
+    } catch (e) {
+      console.error('Profile fetch crash:', e);
       return null;
     }
-    return data;
   },
 
   // Deduct credits

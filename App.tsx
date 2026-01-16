@@ -37,26 +37,51 @@ const AppLayout = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isChecking = React.useRef(false);
   const { showToast } = useToast();
 
   useEffect(() => {
-    // Check active session
-    checkUser();
+    let mounted = true;
+
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          if (session) {
+            await checkUser();
+          } else {
+            setLoading(false);
+          }
+        }
+      } catch (err) {
+        console.error('Init error:', err);
+        if (mounted) setLoading(false);
+      }
+    };
+
+    init();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        await checkUser();
-      } else {
-        setUserProfile(null);
-        setLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (mounted) {
+        if (event === 'SIGNED_IN') {
+          await checkUser();
+        } else if (event === 'SIGNED_OUT') {
+          setUserProfile(null);
+          setLoading(false);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkUser = async () => {
+    if (isChecking.current) return;
+    isChecking.current = true;
     try {
       const profile = await authService.getCurrentProfile();
       setUserProfile(profile);
@@ -68,6 +93,7 @@ const AppLayout = () => {
       console.error('Error loading profile:', error);
     } finally {
       setLoading(false);
+      isChecking.current = false;
     }
   };
 
