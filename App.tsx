@@ -43,24 +43,25 @@ const AppLayout = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Safety timeout to prevent infinite loading
+    // Safety timeout - reduced for better UX, but increased for reliable fetch
     const timer = setTimeout(() => {
       if (mounted && loading) {
         console.warn('Auth initialization timed out');
         setLoading(false);
       }
-    }, 6000); // 6 seconds safety blanket
+    }, 8000);
 
     const init = async () => {
       try {
+        // First, check if we have a session in local storage (very fast)
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (mounted) {
           if (session) {
-            // We have a session, let's load user data
-            // We call it but we don't necessarily await it if we want to be super safe,
-            // but checkUser has its own finally { setLoading(false) }
+            // If session exists, fetch the full profile before showing any page
             await checkUser();
           } else {
+            // No session at all, stop loading
             setLoading(false);
           }
         }
@@ -68,23 +69,21 @@ const AppLayout = () => {
         console.error('Init error:', err);
         if (mounted) setLoading(false);
       } finally {
-        clearTimeout(timer);
+        if (mounted) clearTimeout(timer);
       }
     };
 
     init();
 
-    // Listen for auth changes
+    // Listen for auth changes to sync state across tabs/sessions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        await checkUser();
+        if (session) await checkUser();
       } else if (event === 'SIGNED_OUT') {
         setUserProfile(null);
         setRequests([]);
-        setLoading(false);
-      } else if (event === 'INITIAL_SESSION' && !session) {
         setLoading(false);
       }
     });
@@ -97,14 +96,24 @@ const AppLayout = () => {
   }, []);
 
   const checkUser = async () => {
+    // Only one check at a time
     if (isChecking.current) return;
     isChecking.current = true;
+    
     try {
+      // Use getUser() for security, but it verifies session on server
       const profile = await authService.getCurrentProfile();
-      setUserProfile(profile);
       if (profile) {
-        const { data: reqs } = await supabase.from('subscription_requests').select('*').eq('user_id', profile.id);
+        setUserProfile(profile);
+        // Load requests in background
+        const { data: reqs } = await supabase
+          .from('subscription_requests')
+          .select('*')
+          .eq('user_id', profile.id);
         setRequests(reqs || []);
+      } else {
+        // Profile fetch failed or user not found in DB
+        setUserProfile(null);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
