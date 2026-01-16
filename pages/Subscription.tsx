@@ -6,7 +6,7 @@ import { useToast } from '../components/Toast';
 
 interface Props {
   userCredits: UserCredits;
-  onRequestSub: (phone: string) => void;
+  onRequestSub: (phone: string, plan: 'monthly' | 'quarterly') => void;
 }
 
 const Subscription: React.FC<Props> = ({ userCredits, onRequestSub }) => {
@@ -38,8 +38,7 @@ const Subscription: React.FC<Props> = ({ userCredits, onRequestSub }) => {
       showToast("يا ريس، الرقم ناقص.. اتأكد كدا واكتبه صح!", "error");
       return;
     }
-    const message = `طلب اشتراك جديد: ${plans[selectedPlan].label} (${plans[selectedPlan].price}ج) - رقم: ${phone}`;
-    onRequestSub(phone); // You might want to pass the message/plan details too if the prop allows, otherwise assumes manual check
+    onRequestSub(phone, selectedPlan);
     showToast("زي الفل، طلبك وصل وهنراجعه فوراً!", "success", 4000, "/logo.png");
   };
 

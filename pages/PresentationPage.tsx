@@ -363,6 +363,7 @@ Rules:
 
       setProgressStage(3);
       setGeneratedSlides(slides);
+      authService.logActivity('presentation', { topic });
       showToast("تم توليد محتوى البرزنتيشن بنجاح! 🎉", "success", 4000, "/logo.png");
       
     } catch (e: any) {

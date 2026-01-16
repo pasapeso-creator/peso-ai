@@ -72,9 +72,12 @@ export const authService = {
   },
 
   // Log Activity
-  async logActivity(userId: string, actionType: string, details: any) {
+  async logActivity(actionType: string, details: any) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     await supabase.from('activity_logs').insert({
-      user_id: userId,
+      user_id: user.id,
       action_type: actionType,
       details: details
     });

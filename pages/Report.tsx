@@ -8,6 +8,7 @@ import { searchImages, imageUrlToBase64 } from '../services/imageSearchService';
 import { exportToWord } from '../utils/wordExport';
 import { FileDown, Loader2, FileText, Sparkles, Palette, Check, BookOpen, Search, Image as ImageIcon, X, FileType, Shuffle, ChevronDown, ChevronUp, GraduationCap, User, BadgeInfo, School, Calendar, CheckCircle2, Upload, Plus } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { authService } from '../services/authService';
 import { DESIGN_TEMPLATES, getRandomDesign, DesignTemplate } from '../utils/designTemplates';
 import CoverPage, { CoverPageVariant } from '../components/CoverPage';
 
@@ -219,6 +220,7 @@ IMPORTANT: The output must be entirely in ENGLISH.${hasImages ? ' Remember to di
 
       setProgressStage(3); // Finalizing
       setResult(text);
+      authService.logActivity('report', { topic, subject: data.subject });
 
     } catch (e: any) {
       console.error(e);

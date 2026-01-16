@@ -13,6 +13,7 @@ import {
   Search, Image as ImageIcon, X, CheckCircle2, Upload, Plus
 } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { authService } from '../services/authService';
 import { DESIGN_TEMPLATES, getRandomDesign, DesignTemplate } from '../utils/designTemplates';
 import CoverPage, { CoverPageVariant } from '../components/CoverPage';
 
@@ -221,6 +222,7 @@ IMPORTANT: The output MUST be entirely in English. ONLY include math formulas if
 
       setProgressStage(3);
       setResult(text);
+      authService.logActivity('assignment', { topic, subject: data.subject });
     } catch (e: any) {
       console.error(e);
       showToast(e.message || "يا ساتر، السيرفر مهنج شوية.. جرب تاني كمان شوية", "error");

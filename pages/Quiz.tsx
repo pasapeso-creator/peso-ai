@@ -6,6 +6,7 @@ import ProgressIndicator from '../components/ProgressIndicator';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { Image as ImageIcon, Loader2, CheckCircle2, FileDown, Sparkles, Calculator, BookOpen, User, Hash, FileType, Palette, Shuffle, Check, GraduationCap, BadgeInfo, Calendar, School, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { authService } from '../services/authService';
 import { DESIGN_TEMPLATES, getRandomDesign, DesignTemplate } from '../utils/designTemplates';
 import CoverPage, { CoverPageVariant } from '../components/CoverPage';
 
@@ -138,6 +139,7 @@ Output must be in English. ONLY use LaTeX mathematical notation if the question 
       
       setProgressStage(3); // Finalizing
       setResult(answer);
+      authService.logActivity('quiz', { subject: data.subject });
     } catch (e) {
       showToast("يا ساتر، حصلت مشكلة وأنا بحل السؤال.. اتأكد من السؤال كدا وجرب تاني", "error");
     } finally {

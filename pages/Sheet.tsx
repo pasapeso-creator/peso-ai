@@ -193,6 +193,7 @@ IMPORTANT: Output must be in ENGLISH. Be thorough and complete.`;
       setProgressStage(3); // Finalizing
       const answer = await solveSheet(sheetFile, prompt);
       setResult(answer);
+      authService.logActivity('sheet', { prompt });
       showToast("تم حل الشيت بنجاح! 🎉", "success", 4000, "/logo.png");
     } catch (e: any) {
       console.error("Sheet solving error:", e);

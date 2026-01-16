@@ -102,18 +102,23 @@ const Profile: React.FC = () => {
             logs.map((log) => (
                <div key={log.id} className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 flex items-center gap-4 hover:bg-slate-800/80 transition-colors">
                   <div className="p-3 bg-slate-900 rounded-lg border border-slate-700">
-                     {/* Icon logic placeholder */}
-                     <Activity size={20} className="text-slate-400" />
+                     {activityIcons[log.action_type] || <Activity size={20} className="text-slate-400" />}
                   </div>
-                  <div className="flex-1">
-                     <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wider">{log.action_type}</h4>
+                  <div className="flex-1 text-right">
+                     <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wider">
+                        {log.action_type === 'assignment' ? 'توليد Assignment' :
+                         log.action_type === 'report' ? 'توليد Report' :
+                         log.action_type === 'presentation' ? 'توليد Presentation' :
+                         log.action_type === 'quiz' ? 'حل Quiz' :
+                         log.action_type === 'sheet' ? 'حل Sheet' : log.action_type}
+                     </h4>
                      <p className="text-slate-400 text-xs">
-                        {log.details?.topic || log.details?.subject || 'تم العملية بنجاح'}
+                        {log.details?.topic || log.details?.subject || 'تمت العملية بنجاح'}
                      </p>
                   </div>
                   <div className="text-slate-500 text-xs flex flex-col items-end gap-1">
-                     <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(log.created_at).toLocaleDateString('ar-EG')}</span>
-                     <span className="flex items-center gap-1"><Clock size={10} /> {new Date(log.created_at).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})}</span>
+                     <span className="flex items-center gap-1">{new Date(log.created_at).toLocaleDateString('ar-EG')} <Calendar size={10} /></span>
+                     <span className="flex items-center gap-1">{new Date(log.created_at).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})} <Clock size={10} /></span>
                   </div>
                </div>
             ))

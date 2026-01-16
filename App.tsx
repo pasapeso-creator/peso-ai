@@ -35,6 +35,7 @@ const AppLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
@@ -59,6 +60,10 @@ const AppLayout = () => {
     try {
       const profile = await authService.getCurrentProfile();
       setUserProfile(profile);
+      if (profile) {
+        const { data: reqs } = await supabase.from('subscription_requests').select('*').eq('user_id', profile.id);
+        setRequests(reqs || []);
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
@@ -85,20 +90,20 @@ const AppLayout = () => {
     }
   };
 
-  const handleRequestSubscription = async (phone: string) => {
+  const handleRequestSubscription = async (phone: string, plan: 'monthly' | 'quarterly') => {
     if (!userProfile) return;
     
     // Insert request to Supabase
     const { error } = await supabase.from('subscription_requests').insert({
       user_id: userProfile.id,
       phone_number: phone,
-      plan_type: 'pending_selection' // You might want to pass the plan type from the component
+      plan_type: plan
     });
 
     if (error) {
       showToast("حصل مشكلة في إرسال الطلب", "error");
     } else {
-      showToast("تم استلام طلبك وهنراجعه فوراً", "success");
+      showToast("تم استلام طلبك وهنراجعه فوراً", "success", 4000, "/logo.png");
     }
   };
 
@@ -182,7 +187,11 @@ const AppLayout = () => {
               element={
                 <ProtectedRoute user={userProfile}>
                   <Subscription 
-                    userCredits={{ available: userProfile?.credits || 0, isSubscribed: userProfile?.is_subscribed || false, pendingRequest: false }} 
+                    userCredits={{ 
+                      available: userProfile?.credits || 0, 
+                      isSubscribed: userProfile?.is_subscribed || false, 
+                      pendingRequest: requests.some(r => r.status === 'pending') 
+                    }} 
                     onRequestSub={handleRequestSubscription} 
                   />
                 </ProtectedRoute>
